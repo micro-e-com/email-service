@@ -1,23 +1,28 @@
 import { Controller } from '@nestjs/common';
-import { AppService } from './app.service';
 import { EventPattern, Payload } from '@nestjs/microservices';
+import { MailService } from '@sendgrid/mail';
+import { getWellcomeEmail } from './email-template/wellcome';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  sgMail = new MailService();
 
-  @EventPattern('email')
-  handleEmail(@Payload() data): string {
-    console.log(`Received a new message ${data}`);
-
-    return this.appService.getHello();
+  constructor() {
+    this.sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   }
 
-  @EventPattern('kuy')
-  handleEmailKuy(@Payload() data): string {
-    console.log(`kuy Received a new message ${data}`);
-    console.log(data);
-
-    return this.appService.getHello();
+  @EventPattern('send-email-wellcome')
+  handleEmail(@Payload() data: { name: string; email: string }) {
+    try {
+      const msg = {
+        to: data.email,
+        from: process.env.SENDGRID_SENDER_EMAIL,
+        subject: 'Wellcome to our platform',
+        html: getWellcomeEmail({ name: data.name }),
+      };
+      this.sgMail.send(msg);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

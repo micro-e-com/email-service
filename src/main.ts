@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { MailService } from '@sendgrid/mail';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -14,5 +15,13 @@ async function bootstrap() {
     },
   );
   await app.listen();
+
+  // k.send(msg)
+  //   .then(() => {
+  //     console.log('Email sent');
+  //   })
+  //   .catch((error) => {
+  //     console.error(error.response.body);
+  //   });
 }
 bootstrap();
